@@ -77,18 +77,11 @@ public class ExcelDataGeneration
     /// </summary>
     private void InitDataList()
     {
-        dataset = ReadExcel(EXCEL_DATA_PATH + EXCEL_DATA_NAME);
+        dataset = ExcelDataHelper.ReadExcel(EXCEL_DATA_PATH + EXCEL_DATA_NAME);
         column = dataset.Tables[0].Columns.Count; //竖
         row = dataset.Tables[0].Rows.Count; //横
     }
-    public static DataSet ReadExcel(string path)
-    {
-        FileStream stream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-        IExcelDataReader excelReader = ExcelReaderFactory.CreateOpenXmlReader(stream);
-        DataSet result = excelReader.AsDataSet();
-        excelReader.Close();
-        return result;
-    }
+
 
     /// <summary>
     /// 获取方法名
@@ -98,7 +91,7 @@ public class ExcelDataGeneration
         methodList = new List<string>();
         for (int i = 0; i < column; i++)
         {
-            methodList.Add("set_" + dataset.Tables[0].Rows[1][i].ToString());//存入第二行字段名
+            methodList.Add("set_" + dataset.Tables[0].Rows[2][i].ToString());//存入第二行字段名
         }
     }
 
@@ -110,7 +103,7 @@ public class ExcelDataGeneration
         DataList data = new DataList();
 
         Type type = Type.GetType(GetOperationClassName());
-        for (int i = 3; i < row; i++)
+        for (int i = 4; i < row; i++) //从第四行才是元素
         {
             object typeInst = Activator.CreateInstance(type);
             for (int j = 0; j < column; j++)

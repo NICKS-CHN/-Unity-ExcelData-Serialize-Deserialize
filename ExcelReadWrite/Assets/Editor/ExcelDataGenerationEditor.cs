@@ -102,8 +102,7 @@ class ExcelDataGenerationEditor : EditorWindow
     private string SelectFile()
     {
         string path = EditorUtility.OpenFilePanel("Select Excel file", _ExcelDataGeneration.EXCEL_DATA_PATH,"xlsx");
-        string[] FileName = Path.GetFileNameWithoutExtension(path).Split('_');
-        return FileName[FileName.Length - 1];
+        return ExcelDataHelper.GetAppDtoName(path);
     }
 
     private void AllOperationPanel()

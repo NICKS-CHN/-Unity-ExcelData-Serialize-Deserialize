@@ -12,6 +12,5 @@ namespace appDto
         public int power;
         public string name;
         public List<int> attribute;
-
     }
 }
