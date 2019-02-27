@@ -9,6 +9,12 @@ namespace ExcelDataCreator
     {
         public AchievementDto achievement = new AchievementDto();
 
+        public void set_id(string pId)
+        {
+
+            achievement.id = int.Parse(pId);
+        }
+
         public override object GetData()
         {
             return achievement;

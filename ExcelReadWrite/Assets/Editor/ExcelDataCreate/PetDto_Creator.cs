@@ -14,6 +14,11 @@ namespace ExcelDataCreator
         {
             return petDto;
         }
+
+        public void set_id(string pId)
+        {
+            petDto.id = int.Parse(pId);
+        }
         public void set_name(string pName)
         {
             petDto.name = pName;

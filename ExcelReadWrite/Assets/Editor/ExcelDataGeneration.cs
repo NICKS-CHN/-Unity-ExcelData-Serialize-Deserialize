@@ -139,7 +139,7 @@ public class ExcelDataGeneration
     /// <param name="obj"></param>
     private void WriteByte(object obj)
     {
-        string fileName = STATIC_DATA_PATH + DTO_NAME + ".bytes";
+        string fileName = STATIC_DATA_PATH + "appDto." + DTO_NAME + ".bytes";
         FileHelper.DeleteFile(fileName);
 
         var buff = Object2Bytes(obj);
