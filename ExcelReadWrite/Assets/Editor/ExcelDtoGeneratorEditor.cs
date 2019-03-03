@@ -31,6 +31,7 @@ public class ExcelDtoGeneratorEditor : EditorWindow
     //理论下两个count是一致的，不然就是bug
     private List<string> _fieldList;//字段名列表
     private List<string> _propList; //类型列表
+    private List<string> _notesList; //注释列表
 
 
     #endregion
@@ -63,9 +64,12 @@ public class ExcelDtoGeneratorEditor : EditorWindow
         EditorGUI.EndDisabledGroup();
         if (GUILayout.Button("选择文件", GUILayout.Height(50)))
         {
-            _dtoName = SelectFile();
-            InitDataList();
-            UpdateFieldList();
+            string tName = SelectFile();
+            if (!string.IsNullOrEmpty(tName))
+            {
+                _dtoName = tName;
+                InitData();
+            }
         }
         if (GUILayout.Button("生成协议脚本", GUILayout.Height(50)))
         {
@@ -84,6 +88,17 @@ public class ExcelDtoGeneratorEditor : EditorWindow
     }
 
 
+
+    private void InitData()
+    {
+        EditorUtility.DisplayProgressBar("初始化数据","Loading Excel data...",0f);
+        InitDataList();
+        EditorUtility.DisplayProgressBar("初始化数据","Loading Excel data...",0.5f);
+        UpdateFieldList();
+        EditorUtility.DisplayProgressBar("初始化数据","Loading Excel data...",1f);
+        EditorUtility.ClearProgressBar();
+    }
+
     /// <summary>
     /// 载入Excel数据
     /// </summary>
@@ -94,7 +109,6 @@ public class ExcelDtoGeneratorEditor : EditorWindow
         row = _dataSet.Tables[0].Rows.Count; //横
     }
 
-
     /// <summary>
     /// 载入字段信息
     /// </summary>
@@ -102,6 +116,7 @@ public class ExcelDtoGeneratorEditor : EditorWindow
     {
         _fieldList = new List<string>();
         _propList = new List<string>();
+        _notesList = new List<string>();
         for (int i = 0; i < column; i++)
         {
             string fieldProp = _dataSet.Tables[0].Rows[1][i].ToString(); //属性字段不为空才存入
@@ -109,6 +124,8 @@ public class ExcelDtoGeneratorEditor : EditorWindow
             {
                 _propList.Add(fieldProp);
                 _fieldList.Add(_dataSet.Tables[0].Rows[2][i].ToString());
+                string desc = _dataSet.Tables[0].Rows[3][i].ToString();
+                _notesList.Add(string.Format("/** {0} */", string.IsNullOrEmpty(desc) ? "[Unknown]" : desc));
             }
         }
     }
@@ -130,14 +147,23 @@ public class ExcelDtoGeneratorEditor : EditorWindow
     private string SerializableStr = "[Serializable]";
     private void ProduceCSharpCode()
     {
-        try
+        if (string.IsNullOrEmpty(_dtoName))
         {
+            this.ShowNotification(new GUIContent("请选择文件"));
+            return;
+        }
+        try
+        {          
             string fileFullName = Application.dataPath + APPDTO_GENERATED_PATH + _dtoName + ".cs";
             Action writeText = () =>
             {
-                File.WriteAllText(fileFullName, GetScriptText());
-                this.ShowNotification(new GUIContent("Success 生成C#代码完毕"));
+                EditorUtility.DisplayProgressBar("写入数据", "Writing...", 0.1f);
+                File.WriteAllText(fileFullName, GetScriptText(),Encoding.UTF8);
+                EditorUtility.DisplayProgressBar("写入数据", "Writing...", 0.75f);
                 AssetDatabase.Refresh();
+                EditorUtility.ClearProgressBar();
+                this.ShowNotification(new GUIContent("Success 生成C#代码完毕"));
+
             };
             if (!FileHelper.IsExist(fileFullName))
                 writeText();
@@ -164,16 +190,17 @@ public class ExcelDtoGeneratorEditor : EditorWindow
 
         textBuilder.Append(namespaceStr + "\n");
         textBuilder.Append("{" + "\n");
-        textBuilder.Append("\n");
         textBuilder.Append("    " + SerializableStr + "\n");
         textBuilder.Append(string.Format("    public class {0}", _dtoName) + "\n");
         textBuilder.Append("    {" + "\n");
         if (_fieldList != null && _fieldList.Count > 0)
         {
-            for (var i = 0; i < _fieldList.Count && i < _propList.Count; i++)
+            for (var i = 0; i < _fieldList.Count && i < _propList.Count && i < _notesList.Count; i++)
             {
                 string str = ChangeToField(_propList[i], _fieldList[i]);
+                textBuilder.Append("        " + _notesList[i] + "\n");
                 textBuilder.Append("        " + str + "\n");
+                textBuilder.AppendLine();
             }
         }
         textBuilder.Append("    }" + "\n");
@@ -188,14 +215,22 @@ public class ExcelDtoGeneratorEditor : EditorWindow
 
     private void ProduceCSharpOperationCode()
     {
+        if (string.IsNullOrEmpty(_dtoName))
+        {
+            this.ShowNotification(new GUIContent("请选择文件"));
+            return;
+        }
         try
         {
             string fileFullName = Application.dataPath + APPDTO_GENERATED_CREATE_PATH + _dtoName + "_Creator.cs";
             Action writeText = () =>
             {
-                File.WriteAllText(fileFullName, GetOperationScriptText());
-                this.ShowNotification(new GUIContent("Success 生成C#代码完毕"));
+                EditorUtility.DisplayProgressBar("写入数据", "Writing...", 0.0f);
+                File.WriteAllText(fileFullName, GetOperationScriptText(),Encoding.UTF8);
+                EditorUtility.DisplayProgressBar("写入数据", "Writing...", 0.75f);
                 AssetDatabase.Refresh();
+                EditorUtility.ClearProgressBar();
+                this.ShowNotification(new GUIContent("Success 生成C#代码完毕"));
             };
             if (!FileHelper.IsExist(fileFullName))
                 writeText();
@@ -232,7 +267,10 @@ public class ExcelDtoGeneratorEditor : EditorWindow
         for (var i = 0; i < _fieldList.Count; i++)
         {
             if (_fieldList[i] != "id") //ID字段已经设置过了
+            {
+                textBuilder.AppendLine(_notesList[i]);
                 textBuilder.AppendLine(ChangeToFunction(_fieldList[i]));
+            }
         }
         textBuilder.Append("    }\n");
         textBuilder.Append("}\n");

@@ -1,4 +1,4 @@
-using appDto;
+﻿using appDto;
 
 namespace ExcelDataCreator
 {
@@ -16,11 +16,19 @@ namespace ExcelDataCreator
             _titleDto.id = int.Parse(pId);
         }
 
+        /** 名字 */
         public void set_name(string pName)
         {
 
         }
 
+        /** 描述 */
+        public void set_desc(string pDesc)
+        {
+
+        }
+
+        /** 技能列表 */
         public void set_skillId(string pSkillId)
         {
 

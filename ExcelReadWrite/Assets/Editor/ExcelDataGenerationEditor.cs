@@ -66,7 +66,9 @@ class ExcelDataGenerationEditor : EditorWindow
         _dtoName = EditorGUILayout.TextField("静态数据类名", _dtoName, GUILayout.Width(700));
         if (GUILayout.Button("选择文件", GUILayout.Height(50)))
         {
-            _dtoName = SelectFile();
+            string tName = SelectFile();
+            if (!string.IsNullOrEmpty(tName))
+                _dtoName = tName;
         }
         EditorGUI.BeginDisabledGroup(true);
         EditorGUILayout.TextField("Excel文件路径", _ExcelDataGeneration.GET_EXCEL_DATA_PATH, GUILayout.Width(700));

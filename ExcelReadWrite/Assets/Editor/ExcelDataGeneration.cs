@@ -144,7 +144,7 @@ public class ExcelDataGeneration
     /// </summary>
     /// <param name="obj"></param>
     /// <returns></returns>
-    public ByteArray Object2Bytes(object obj)
+    private ByteArray Object2Bytes(object obj)
     {
         ByteArray buff;
         using (MemoryStream ms = new MemoryStream())
