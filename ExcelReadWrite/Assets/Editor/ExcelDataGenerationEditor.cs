@@ -24,6 +24,11 @@ class ExcelDataGenerationEditor : EditorWindow
     private static ExcelDataGeneration _ExcelDataGeneration;
     private string _excelDataName;
     private string _dtoName;
+
+
+    //继承
+    private bool isInherit = false;
+    private string _inheritDtoName;//类名
     #endregion
 
     #region Editor
@@ -69,6 +74,21 @@ class ExcelDataGenerationEditor : EditorWindow
             string tName = SelectFile();
             if (!string.IsNullOrEmpty(tName))
                 _dtoName = tName;
+        }
+        isInherit = GUILayout.Toggle(isInherit, new GUIContent("是否继承"));
+        if (isInherit)
+        {
+            EditorGUI.BeginDisabledGroup(true);
+            _inheritDtoName = EditorGUILayout.TextField("继承类", _inheritDtoName, GUILayout.Width(700));
+            EditorGUI.EndDisabledGroup();
+            if (GUILayout.Button("选择继承文件", GUILayout.Height(50)))
+            {
+                string tName = SelectFile();
+                if (!string.IsNullOrEmpty(tName))
+                {
+                    _inheritDtoName = tName;
+                }
+            }
         }
         EditorGUI.BeginDisabledGroup(true);
         EditorGUILayout.TextField("Excel文件路径", _ExcelDataGeneration.GET_EXCEL_DATA_PATH, GUILayout.Width(700));

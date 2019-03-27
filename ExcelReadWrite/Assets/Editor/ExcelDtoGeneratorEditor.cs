@@ -33,7 +33,6 @@ public class ExcelDtoGeneratorEditor : EditorWindow
     private List<string> _propList; //类型列表
     private List<string> _notesList; //注释列表
 
-
     #endregion
 
 
@@ -71,6 +70,7 @@ public class ExcelDtoGeneratorEditor : EditorWindow
                 InitData();
             }
         }
+
         if (GUILayout.Button("生成协议脚本", GUILayout.Height(50)))
         {
             ProduceCSharpCode();
